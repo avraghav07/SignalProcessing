@@ -1,7 +1,7 @@
 import numpy as np
 from scipy.fft import fft,ifft
 import matplotlib.pyplot as plt
-x=np.array([1,2,3,4,2, 1])
+x=np.array([1,2,3,4,2,1])
 x=np.pad(x,(0,9),'constant',constant_values=(0))
 N=15
 def hn(n):

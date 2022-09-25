@@ -8,11 +8,11 @@ import matplotlib.pyplot as plt
 
 #DTFT
 def H(z):
-	num = np.polyval([1,0,1], z**(-1))
+	num = np.polyval([1,0,1],z**(-1))
 	den = np.polyval([0.5,1],z**(-1))
 	H = num/den
 	return H
-
+		
 
 
 #Input and Output
@@ -31,3 +31,7 @@ plt.grid()# minor
 #subprocess.run(shlex.split("termux-open ../figs/dtft.pdf"))
 #else
 plt.show()
+
+
+
+

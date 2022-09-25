@@ -11,8 +11,52 @@
 %\usepackage{graphicx}
 %\usepackage{amssymb}
 %\usepackage{relsize}
+\newcommand{\myvec}[1]{\ensuremath{\begin{pmatrix}#1\end{pmatrix}}}
+\newcommand{\mydet}[1]{\ensuremath{\begin{vmatrix}#1\end{vmatrix}}}
 \usepackage[cmex10]{amsmath}
 \usepackage{mathtools}
+\usepackage{polynom}
+\makeatletter
+\def\pld@CF@loop#1+{%
+    \ifx\relax#1\else
+        \begingroup
+          \pld@AccuSetX11%
+          \def\pld@frac{{}{}}\let\pld@symbols\@empty\let\pld@vars\@empty
+          \pld@false
+          #1%
+          \let\pld@temp\@empty
+          \pld@AccuIfOne{}{\pld@AccuGet\pld@temp
+                            \edef\pld@temp{\noexpand\pld@R\pld@temp}}%
+           \pld@if \pld@Extend\pld@temp{\expandafter\pld@F\pld@frac}\fi
+           \expandafter\pld@CF@loop@\pld@symbols\relax\@empty
+           \expandafter\pld@CF@loop@\pld@vars\relax\@empty
+           \ifx\@empty\pld@temp
+               \def\pld@temp{\pld@R11}%
+           \fi
+          \global\let\@gtempa\pld@temp
+        \endgroup
+        \ifx\@empty\@gtempa\else
+            \pld@ExtendPoly\pld@tempoly\@gtempa
+        \fi
+        \expandafter\pld@CF@loop
+    \fi}
+\def\pld@CMAddToTempoly{%
+    \pld@AccuGet\pld@temp\edef\pld@temp{\noexpand\pld@R\pld@temp}%
+    \pld@CondenseMonomials\pld@false\pld@symbols
+    \ifx\pld@symbols\@empty \else
+        \pld@ExtendPoly\pld@temp\pld@symbols
+    \fi
+    \ifx\pld@temp\@empty \else
+        \pld@if
+            \expandafter\pld@IfSum\expandafter{\pld@temp}%
+                {\expandafter\def\expandafter\pld@temp\expandafter
+                    {\expandafter\pld@F\expandafter{\pld@temp}{}}}%
+                {}%
+        \fi
+        \pld@ExtendPoly\pld@tempoly\pld@temp
+        \pld@Extend\pld@tempoly{\pld@monom}%
+    \fi}
+\makeatother
 %\usepackage{amsthm}
 %\interdisplaylinepenalty=2500
 %\savesymbol{iint}
@@ -168,7 +212,7 @@ Digital Signal Processing
 % was not built to handle multiple paragraphs
 %
 
-\author{ Venkata Raghav Ambati %<-this  stops a space
+\author{ Venkata Raghav %<-this  stops a space
 % <-this % stops a space
 %\thanks{J. Doe and J. Doe are with Anonymous University.}% <-this % stops a space
 %\thanks{Manuscript received April 19, 2005; revised January 11, 2007.}}
@@ -247,7 +291,7 @@ sudo pip install cffi pysoundfile
 \begin{enumerate}[label=\thesection.\arabic*
 ,ref=\thesection.\theenumi]
 \item
-%\label{prob:input}
+\label{prob:input}
 Download the sound file from  
 \begin{lstlisting}
 wget https://github.com/avraghav07/SignalProcessing/blob/master/2/Sound_Noise.wav
@@ -264,14 +308,14 @@ You will find a spectrogram at \href{https://academo.org/demos/spectrum-analyzer
 %%\onecolumn
 %%\input{./figs/fir}
 %\begin{problem}
-%Upload the sound file that you downloaded in Problem \ref{prob:input} in the spectrogram  and play.  Observe the spectrogram. What do you find?
+Upload the sound file that you downloaded in Problem \ref{prob:input} in the spectrogram  and play.  Observe the spectrogram. What do you find?
 \\
 %
 \solution There are a lot of yellow lines between 440 Hz to 5.1 KHz.  These represent the synthesizer key tones. Also, the key strokes
 are audible along with background noise.
 % By observing spectrogram, it clearly shows that tonal frequency is under 4kHz. And above 4kHz only noise is present.
 \item
-%\label{prob:output}
+\label{prob:output}
 Write the python code for removal of out of band noise and execute the code.
 \\
 \solution
@@ -281,20 +325,19 @@ https://github.com/avraghav07/SignalProcessing/blob/master/2/filter.py
 \end{lstlisting}
 Use the following command in the terminal to run the code
 \begin{lstlisting}
-python3 Cancel_noise.py
+python3 filter.py
 \end{lstlisting}
 %\begin{figure}[h]
 %\centering
-%\includegraphics[width=\columnwidth]{D:\Uni\Programming\pranavSignalProcessing\SIgnalProcessing-main\3\xy.pdf}
+%\includegraphics[width=\columnwidth]{enc_block_diag.png}
 %\caption{}
 %\label{fig:convolution encoder}
 %\end{figure}
 %\input{block_enc}
 \item
-%The output of the python script in Problem \ref{prob:output} is the audio file Sound\_With\_ReducedNoise.wav. Play the file in the spectrogram in Problem \ref{prob:spectrogram}. What do you observe?
-
-\solution The key strokes as well as background noise is subdued in the audio. Also,  the signal is blank for frequencies above 5.1 kHz.
+The output of the python script in Problem \ref{prob:output} is the audio file Sound\_With\_ReducedNoise.wav. Play the file in the spectrogram in Problem \ref{prob:spectrogram}. What do you observe?
 \\
+\solution The key strokes as well as background noise is subdued in the audio.  Also,  the signal is blank for frequencies above 5.1 kHz.
 
 \end{enumerate}
 \section{Difference Equation}
@@ -318,12 +361,12 @@ First run the following c code to generate data
 \begin{lstlisting}
 wget https://github.com/avraghav07/SignalProcessing/blob/master/3/xy.c
 \end{lstlisting}
-Use the following commands in terminal to compile and run code
+Use the following command in terminal to run code
 \begin{lstlisting}
-gcc -o output xy.c
+gcc -o ouptut xy.c
 ./output
 \end{lstlisting}
-Then run the below python code which yields Fig. \ref{fig:fig3.2.pdf}.
+Then run the below python code which yields Fig. \ref{fig:xnyn}.
 \begin{lstlisting}
 wget https://github.com/avraghav07/SignalProcessing/blob/master/3/xnyn.py
 \end{lstlisting}
@@ -333,10 +376,10 @@ python3 xnyn.py
 \end{lstlisting}
 \begin{figure}[!ht]
 \begin{center}
-\includegraphics[width=\columnwidth]{fig3.2.pdf}
+\includegraphics[width=\columnwidth]{~/SignalProcessing/3/xnyn.pdf}
 \end{center}
 \captionof{figure}{}
-\label{fig:fig3.2.pdf}	
+\label{fig:xnyn}	
 \end{figure}
 
 \end{enumerate}
@@ -462,7 +505,7 @@ known as the {\em Discrete Time Fourier Transform} (DTFT) of $x(n)$.
 		&= \sqrt{\frac{2(2\cos^2\omega)4}{5 + 4\cos\omega} } \\
 		&= \frac{4\abs{\cos\omega}}{\sqrt{5 + 4\cos\omega}}
 	\end{align} 
-The period of numerator is $\pi$  and period of denominator is $2 \pi$,$\therefore$ the period of $|H(e^{i \omega})|$ is LCM($\pi,2 \pi$)=$2\pi$. The following code plots Fig. \ref{fig:fig4.6.pdf}.
+The period of numerator is $\pi$  and period of denominator is $2 \pi$,$\therefore$ the period of $|H(e^{i \omega})|$ is LCM($\pi,2 \pi$)=$2\pi$. The following code plots Fig. \ref{fig:dtft}.
 \begin{lstlisting}
 wget https://github.com/avraghav07/SignalProcessing/blob/master/4/dtft.py
 \end{lstlisting}
@@ -472,19 +515,43 @@ python3 dtft.py
 \end{lstlisting}
 \begin{figure}[!ht]
 \centering
-\includegraphics[width=\columnwidth]{fig4.6.pdf}
+\includegraphics[width=\columnwidth]{~/SignalProcessing/4/dtft}
 \caption{$\abs{H\brak{e^{\j\omega}}}$}
-\label{fig:fig4.6.pdf}
+\label{fig:dtft}
 \end{figure}
-\item Express $h(n)$ in terms of $H\brak{e^{\j \omega}}$.
-$x(n)=\frac{1}{2 \pi} \int_{-\pi}^{\pi} X(\omega) e^{j \omega n} d \omega$\\
+\item Express $h(n)$ in terms of $H\brak{e^{\j \omega}}$.\\
+\solution
+$h(n)=\frac{1}{2 \pi} \int_{-\pi}^{\pi} H(\omega) e^{j \omega n} d \omega$\\
  \begin{align}
  =\frac{1}{2 \pi} \int_{-\pi}^{\pi} \frac{1 + e^{-2\j\omega}}{1 + \frac12 e^{-\j\omega}} e^{j \omega n} d\omega\\
  \end{align}
 \end{enumerate}
-
 \section{Impulse Response}
 \begin{enumerate}[label=\thesection.\arabic*]
+\item Using long division, 
+find
+		\begin{align}
+			h(n), \quad n < 5
+		\end{align}
+		for H(z) in 
+		\eqref{eq:freq_resp}.\\
+\solution  
+	\begin{equation}
+		H(z) = \frac{1 + z^{-2}}{1 + \frac12 z^{-1}}
+	\end{equation}
+	Substitute $z^{-1} = x$
+	
+	\polylongdiv{1+x^2}{1+\frac12 x}
+	
+	\begin{align}
+		&\implies 1 + z^{-2} = \brak{1 + \frac12 z^{-1}}\brak{-4 + 2z^{-1}} + 5 \\
+		&\implies H(z) = -4 + 2z^{-1} + \frac{5}{1 + \frac12 z^{-1}}\\
+		&\frac{1}{1+x}=1-x+x^2-x^3+\cdots\\
+		&\therefore \frac{1}{1+\frac{z^{-1}}{2}}=1-\frac{z^{-1}}{2}+[\frac{z^{-1}}{2}]^{2}+\cdots\\
+		&\therefore =-4+2z^{-1}+5(1-\frac{z^{-1}}{2}+\left[\frac{z^{-1}}{2}\right]^{2}+\cdots)\\
+		&=1-\frac{z^{-1}}{2}+\sum_{n=2}^{\infty}\frac{5}{4} \left(\frac{-1}{2}\right)^{(n-2)}\\
+		\end{align}
+		comparing coefficients we get $h(0)=1$,$h(1)=\frac{-1}{2}$ and $h(n)=\frac{5}{4} \left(\frac{-1}{2}\right)^{(n-2)} \forall n \geq 2$\\
 \item \label{prob:impulse_resp}
 Find an expression for $h(n)$ using $H(z)$, given that 
 %in Problem \ref{eq:ztransab} and \eqref{eq:anun}, given that
@@ -504,7 +571,7 @@ H(z) &= \frac{1}{1 + \frac{1}{2}z^{-1}} + \frac{ z^{-2}}{1 + \frac{1}{2}z^{-1}}
 using \eqref{eq:anun} and \eqref{eq:z_trans_shift}.
 \item Sketch $h(n)$. Is it bounded? Convergent? 
 \\
-\solution The following code plots Fig. \ref{fig:fig5.2.pdf}.
+\solution The following code plots Fig. \ref{fig:hn}.
 \begin{lstlisting}
 wget https://github.com/avraghav07/SignalProcessing/blob/master/5/hn.py
 \end{lstlisting}
@@ -514,10 +581,31 @@ python3 hn.py
 \end{lstlisting}
 \begin{figure}[!ht]
 \centering
-\includegraphics[width=\columnwidth]{fig5.4.pdf}
+\includegraphics[width=\columnwidth]{~/SignalProcessing/5/hn}
 \caption{$h(n)$ as the inverse of $H(z)$}
-\label{fig:5.2.pdf}
+\label{fig:hn}
 \end{figure}
+\begin{align}
+		\abs{u(n)} &\le 1 \\
+		\abs{\brak{-\frac12}^n} &\le 1 \\
+		\implies \abs{\brak{-\frac12}^n u(n)} &\le 1
+	\end{align}
+	
+	Similarly,
+	\begin{align}
+		\abs{\brak{-\frac12}^{n-2} u(n-2)} &\le 1 \\
+		\implies h(n) &\le 2
+	\end{align}
+	
+	Therefore $h(n)$ is bounded.
+	Using the ratio test for convergence
+	\begin{align}
+		\lim_{n \to \infty} \abs{\frac{h(n+1)}{h(n)}} &= \lim_{n \to \infty} \abs{\frac{\brak{-\frac12}^{n-1} \brak{\frac14 + 1}}{\brak{-\frac12}^{n-2} \brak{\frac14 + 1}}} \\
+		&= \lim_{n \to \infty} \abs{-\frac12} \\
+		&= \frac{1}{2} < 1
+	\end{align}
+	
+	Therefore, $h(n)$ is convergent.
 %
 \item The system with $h(n)$ is defined to be stable if
 \begin{equation}
@@ -537,7 +625,7 @@ Is the system defined by \eqref{eq:iir_filter} stable for the impulse response i
 &\therefore h(n)=\begin{cases}
 0 & n<0\\
 \left(\frac{-1}{2}\right)^n & 0 \leq n<2\\
-\left(\frac{-1}{2}\right)^n +\left(\frac{-1}{2}\right)^{(n-2)} & n \geq 2
+\left(\frac{-1}{2}\right)^n +\left(\frac{-1}{2}\right)^{(n-2)} ={\left(\frac{-1}{2}\right)}^{(n-2)}\left(\frac{5}{4}\right)& n \geq 2
 \end{cases}\\
 &\therefore \sum_{n=-\infty}^{\infty}h(n)=0+1+\frac{-1}{2}+\sum_{n=2}^{\infty}\left[\left(\frac{-1}{2}\right)^n +\left(\frac{-1}{2}\right)^{(n-2)}\right]\\
 &=\frac{1}{2}+\frac{5}{4}\left(\frac{2}{3}\right)=\frac{4}{3}<\infty\\
@@ -552,9 +640,8 @@ h(n) + \frac{1}{2}h(n-1) = \delta(n) + \delta(n-2),
 \end{equation}
 %
 This is the definition of $h(n)$.
-\\
-\solution The following code plots Fig. \ref{fig:fig5.4.pdf}. Note that this is the same as Fig. 
-\ref{fig:fig5.2.pdf}. 
+\solution The following code plots Fig. \ref{fig:hndef}. Note that this is the same as Fig. 
+\ref{fig:hn}. 
 %
 \begin{lstlisting}
 wget https://github.com/avraghav07/SignalProcessing/blob/master/5/hndef.py
@@ -565,9 +652,9 @@ python3 hndef.py
 \end{lstlisting}
 \begin{figure}[!ht]
 \centering
-\includegraphics[width=\columnwidth]{fig5.5.pdf}
+\includegraphics[width=\columnwidth]{~/SignalProcessing/5/hndef}
 \caption{$h(n)$ from the definition}
-\label{fig:fig5.4.pdf}
+\label{fig:hndef}
 \end{figure}
 %
 \item Compute 
@@ -598,9 +685,9 @@ $X=\begin{bmatrix}
 0 & 0 & 0 &\cdots & 1 & 2 & 3 & 4 & 2 & 1
 \end{bmatrix}$
 $\therefore Y^{T}= X*H$\\
- The following code plots Fig. \ref{fig:fig5.5.pdf}. Note that this is the same as 
+ The following code plots Fig. \ref{fig:ynconv}. Note that this is the same as 
 $y(n)$ in  Fig. 
-\ref{fig:fig3.2.pdf}. 
+\ref{fig:xnyn}. 
 %
 \begin{lstlisting}
 wget https://github.com/avraghav07/SignalProcessing/blob/master/5/ynconv.py
@@ -611,9 +698,9 @@ python3 ynconv.py
 \end{lstlisting}
 \begin{figure}[!ht]
 \centering
-\includegraphics[width=\columnwidth]{fig5.5.pdf}
+\includegraphics[width=\columnwidth]{~/SignalProcessing/5/ynconv}
 \caption{$y(n)$ from the definition of convolution}
-\label{fig:fig5.5.pdf}
+\label{fig:ynconv}
 \end{figure}
 
 \item Show that
@@ -647,7 +734,7 @@ wget https://github.com/avraghav07/SignalProcessing/blob/master/6/6.1.py
 \end{lstlisting}
 Use the following command in the terminal to run the code
 \begin{lstlisting}
-python3 6.1.py
+python3 6_1.py
 \end{lstlisting}
 \item Compute 
 \begin{equation}
@@ -659,16 +746,16 @@ wget https://github.com/avraghav07/SignalProcessing/blob/master/6/6.2.py
 \end{lstlisting}
 Use the following command in the terminal to run the code
 \begin{lstlisting}
-python3 6.2.py
+python3 6_2.py
 \end{lstlisting}
 \item Compute
 \begin{equation}
  y\brak{n}={\frac {1}{N}}\sum _{k=0}^{N-1}Y\brak{k}\cdot e^{\j 2\pi kn/N},\quad n = 0,1,\dots, N-1
 \end{equation}
 \\
-\solution The following code plots Fig. \ref{fig:fig5.5.pdf}. Note that this is the same as 
+\solution The following code plots Fig. \ref{fig:ynconv}. Note that this is the same as 
 $y(n)$ in  Fig. 
-\ref{fig:fig3.2.pdf}. 
+\ref{fig:xnyn}. 
 %
 \begin{lstlisting}
 wget https://github.com/avraghav07/SignalProcessing/blob/master/6/yndft.py
@@ -679,16 +766,16 @@ python3 yndft.py
 \end{lstlisting}
 \begin{figure}[!ht]
 \centering
-\includegraphics[width=\columnwidth]{fig6.3.pdf}
+\includegraphics[width=\columnwidth]{~/SignalProcessing/6/yndft}
 \caption{$y(n)$ from the DFT}
-\label{fig:fig6.3.pdf}
+\label{fig:yndft}
 \end{figure}
 \item Repeat the previous exercise by computing $X(k), H(k)$ and $y(n)$ through FFT and 
 IFFT.\\
 \solution 
 Run the following code to generate the plot below
 \begin{lstlisting}
-wget https://github.com/avraghav07/SignalProcessing/blob/master/6/6.4.py
+wget https://github.com/avraghav07/SignalProcessing/blob/master/6/xk.py
 \end{lstlisting}
 Use the following command in the terminal to run the code
 \begin{lstlisting}
@@ -696,39 +783,406 @@ python3 xk.py
 \end{lstlisting}
 \begin{figure}[!ht]
 \centering
-\includegraphics[width=\columnwidth]{fig6.4.png}
+\includegraphics[width=\columnwidth]{~/SignalProcessing/6/fft_ifft}
 \caption{IFFT}
-\label{fig:fig6.4.png}
+\label{fig:fft_ifft}
 \end{figure}
 \item Wherever possible, express all the above equations as matrix equations.
 \\
-\solution Let $X=\begin{bmatrix}
-1 \\2 \\3 \\4 \\2 \\1 \\ \vdots \\0
-\end{bmatrix}_{(N-1 \times 1)} $ and 
-\\$J=\begin{bmatrix}
-0\\ e^{-2\pi j(1)k/N} \\ e^{-2\pi j(2)k/N}\\ e^{-2\pi j(3)k/N}\\ \vdots \\ e^{-2\pi j(N-1)k/N}
-\end{bmatrix}_{(N-1 \times 1)}$\\
-$\therefore X(k)=X^{	T}J$\\
-From (5.7) $H=\begin{bmatrix}
-h(0) \\ h(1) \\h(2) \\ \vdots \\ h(N-1)
-\end{bmatrix}_{(N-1 \times 1)}$\\
-$\therefore H(k)=H^{T} J$\\
-$Y=\begin{bmatrix}
-H(0)X(0) \\ H(1)X(1) \\ \vdots \\ H(N-1)X(N-1)
-\end{bmatrix}_{(N-1 \times 1)}$\\
-$\therefore y(n)=Y^{T}J$
+\solution 
+\begin{align}
+		\vec{x} &= \myvec{x_0 & x_1	 & \cdots & x_{N-1}}^\top \\
+		\vec{h} &= \myvec{x_0 & x_1	 & \cdots & x_{N-1}}^\top \\
+		\vec{y} &= \vec{x} \circledast \vec{h} \\
+		\myvec{y_1 \\ y_2 \\ \vdots \\ y_{2N - 1}} &= \myvec{
+			h_0 & 0 & 0 & \cdots & 0 \\
+			h_1 & h_0 & 0 & \cdots & 0 \\
+			h_2 & h_1 & h_0 & \cdots & 0 \\
+			\vdots & \vdots & \vdots & \ddots & \vdots \\
+			h_{N-1} & h_{N-2} & h_{N-3} & \cdots & h_0 \\
+			0 & h_{N-1} & h_{N-2} & \cdots & h_1 \\
+			0 & 0 & h_{N-1} & \cdots & h_2 \\
+			\vdots & \vdots & \vdots & \ddots & \vdots \\
+			0 & 0 & 0 & \cdots & h_{N-1}
+		}		
+		\myvec{x_1\\x_2\\ \vdots \\x_N}
+	\end{align}
+	
+	The convolution can be written using a Toeplitz matrix. 
+	
+	Consider the DFT matrix
+	\begin{align}
+		\vec{W} = \myvec{
+			1 & 1 & 1 & 1 & \cdots & 1 \\
+			1 & \omega & \omega^2 & \omega^3 & \cdots & \omega^{N-1} \\
+			1 & \omega^2 & \omega^4 & \omega^6 & \cdots & \omega^{2(N-1)} \\
+			1 & \omega^3 & \omega^6 & \omega^9 & \cdots & \omega^{3(N-1)} \\
+			\vdots & \vdots & \vdots & \vdots & \ddots & \vdots \\ 
+			1 & \omega^{N-1} & \omega^{2(N-1)} & \omega^{3(N-1)} & \cdots & \omega^{(N-1)(N-1)}
+		}
+	\end{align}
+	
+	where $\omega = e^{-\j 2\pi/N}$ is the $N^{\mathrm{th}}$ root of unity
+	
+	Then the discrete Fourier transforms of $\vec{x}$ and $\vec{h}$ are given by
+	\begin{align}
+		\vec{X} &= \vec{W} \vec{x} \\
+		\vec{H} &= \vec{W} \vec{h}
+	\end{align}
+	
+	$\vec{Y}$ is then given by
+	\begin{equation}
+		\vec{Y} = \vec{X} \circ \vec{H}
+	\end{equation}
+	where $\circ$ denotes the Hadamard product (element-wise multiplication)
+	
+	But $\vec{Y}$ is the discrete Fourier transform of the filter output $\vec{y}$
+	\begin{equation}
+		\vec{Y} = \vec{W} \vec{y}
+	\end{equation}
+	Thus,
+	\begin{align}
+		\vec{W} \vec{y} &= \vec{X} \circ \vec{H} \\
+		\implies \vec{y} &= \vec{W}^{-1} \brak{\vec{X} \circ \vec{H}} \\
+		&= \vec{W}^{-1} \brak{\vec{W} \vec{x} \circ \vec{W} \vec{h}}
+	\end{align}
+	This is the inverse discrete Fourier transform of $\vec{Y}$
 \end{enumerate}
+\section{FFT}
+ \subsection{Definitions}
+\begin{enumerate}[label=\arabic*.,ref=\thesection.\theenumi]
+\numberwithin{equation}{section}
+    \item The DFT of $x(n)$ is given by
+    \begin{align}
+        X(k) \triangleq \sum_{n=0}^{N-1} x(n) e^{-j 2 \pi k n / N}, \quad k=0,1, \ldots, N-1
+    \end{align}
+\item Let 
+	\begin{align}
+W_{N} = e^{-j2\pi/N} 
+	\end{align}
+		Then the $N$-point {\em DFT matrix} is defined as 
+	\begin{align}
+		\vec{F}_{N} = \sbrak{W_{N}^{mn}}, \quad 0 \le m,n \le N-1 
+	\end{align}
+	where $W_{N}^{mn}$ are the elements of $\vec{F}_{N}$.
+\item Let 
+	\begin{align}
+		\vec{I}_4 = \myvec{\vec{e}_4^{1} &\vec{e}_4^{2} &\vec{e}_4^{3} &\vec{e}_4^{4} }
+	\end{align}
+		be the $4\times 4$ identity matrix.  Then the 4 point {\em DFT permutation matrix} is defined as 
+	\begin{align}
+		\vec{P}_4 = \myvec{\vec{e}_4^{1} &\vec{e}_4^{3} &\vec{e}_4^{2} &\vec{e}_4^{4} }
+	\end{align}
+\item The 4 point {\em DFT diagonal matrix} is defined as 
+	\begin{align}
+		\vec{D}_4 = diag\myvec{W_{8}^{0} & W_{8}^{1} & W_{8}^{2} & W_{8}^{3}}
+	\end{align}
+\item Show that 
+\begin{equation}
+    W_{N}^{2}=W_{N/2}
+\end{equation}
+%    \item Find $\vec{P}_6$.
+%    \item Find $\vec{D}_3$.
+    \item Show that 
+\begin{equation}
+	\vec{F}_{4}=
+\begin{bmatrix}
+	\vec{I}_{2} & \vec{D}_{2} \\
+\vec{I}_{2} & -\vec{D}_{2}
+\end{bmatrix}
+\begin{bmatrix}
+\vec{F}_{2} & 0 \\
+0 & \vec{F}_{2}
+\end{bmatrix}
+\vec{P}_{4}
+\end{equation}
+\item Show that 
+\begin{equation}
+\vec{F}_{N}=
+\begin{bmatrix}
+\vec{I}_{N/2} & \vec{D}_{N/2} \\
+\vec{I}_{N/2} & -\vec{D}_{N/2}
+\end{bmatrix}
+\begin{bmatrix}
+\vec{F}_{N/2} & 0 \\
+0 & \vec{F}_{N/2}
+\end{bmatrix}
+\vec{P}_{N}
+\end{equation}
+\item Find 
+    \begin{align}
+	     \vec{P}_4 \vec{x}
+    \end{align}
+\item Show that 
+    \begin{align}
+	    \vec{X} = \vec{F}_N \vec{x}
+	    \label{eq:dft-mat-def}
+    \end{align}
+		where $\vec{x}, \vec{X}$ are the vector representations of $x(n), X(k)$ respectively.
+\item Derive the following Step-by-step visualisation  of
+8-point FFTs into 4-point FFTs and so on
+\begin{equation}
+\begin{bmatrix}
+X(0) \\ 
+X(1) \\ 
+X(2) \\ 
+X(3)
+\end{bmatrix}
+=
+\begin{bmatrix}
+X_{1}(0) \\ 
+X_{1}(1)\\ 
+X_{1}(2)\\
+X_{1}(3)\\
+\end{bmatrix}
++
+\begin{bmatrix}
+W^{0}_{8} & 0 & 0 & 0\\
+0 & W^{1}_{8} & 0 & 0\\
+0 & 0 & W^{2}_{8} & 0\\
+0 & 0 & 0 & W^{3}_{8}
+\end{bmatrix}
+\begin{bmatrix}
+X_{2}(0) \\ 
+X_{2}(1) \\ 
+X_{2}(2) \\
+X_{2}(3)
+\end{bmatrix}
+\end{equation}
+\begin{equation}
+\begin{bmatrix}
+X(4) \\ 
+X(5) \\ 
+X(6) \\ 
+X(7)
+\end{bmatrix}
+=
+\begin{bmatrix}
+X_{1}(0) \\ 
+X_{1}(1)\\ 
+X_{1}(2)\\
+X_{1}(3)\\
+\end{bmatrix}
+-
+\begin{bmatrix}
+W^{0}_{8} & 0 & 0 & 0\\
+0 & W^{1}_{8} & 0 & 0\\
+0 & 0 & W^{2}_{8} & 0\\
+0 & 0 & 0 & W^{3}_{8}
+\end{bmatrix}
+\begin{bmatrix}
+X_{2}(0) \\ 
+X_{2}(1) \\ 
+X_{2}(2) \\
+X_{2}(3)
+\end{bmatrix}
+\end{equation}
+4-point FFTs into 2-point FFTs
+\begin{equation}
+\begin{bmatrix}
+X_{1}(0) \\ 
+X_{1}(1)\\ 
+\end{bmatrix}
+=
+\begin{bmatrix}
+X_{3}(0) \\ 
+X_{3}(1)\\ 
+\end{bmatrix}
++
+\begin{bmatrix}
+W^{0}_{4} & 0\\
+0 & W^{1}_{4}
+\end{bmatrix}
+\begin{bmatrix}
+X_{4}(0) \\ 
+X_{4}(1) \\ 
+\end{bmatrix}
+\end{equation}
+\begin{equation}
+\begin{bmatrix}
+X_{1}(2) \\ 
+X_{1}(3)\\ 
+\end{bmatrix}
+=
+\begin{bmatrix}
+X_{3}(0) \\ 
+X_{3}(1)\\ 
+\end{bmatrix}
+-
+\begin{bmatrix}
+W^{0}_{4} & 0\\
+0 & W^{1}_{4}
+\end{bmatrix}
+\begin{bmatrix}
+X_{4}(0) \\ 
+X_{4}(1) \\ 
+\end{bmatrix}
+\end{equation}
+\begin{equation}
+\begin{bmatrix}
+X_{2}(0) \\ 
+X_{2}(1)\\ 
+\end{bmatrix}
+=
+\begin{bmatrix}
+X_{5}(0) \\ 
+X_{5}(1)\\ 
+\end{bmatrix}
++
+\begin{bmatrix}
+W^{0}_{4} & 0\\
+0 & W^{1}_{4}
+\end{bmatrix}
+\begin{bmatrix}
+X_{6}(0) \\ 
+X_{6}(1) \\ 
+\end{bmatrix}
+\end{equation}
+\begin{equation}
+\begin{bmatrix}
+X_{2}(2) \\ 
+X_{2}(3)\\ 
+\end{bmatrix}
+=
+\begin{bmatrix}
+X_{5}(0) \\ 
+X_{5}(1)\\ 
+\end{bmatrix}
+-
+\begin{bmatrix}
+W^{0}_{4} & 0\\
+0 & W^{1}_{4}
+\end{bmatrix}
+\begin{bmatrix}
+X_{6}(0) \\ 
+X_{6}(1) \\ 
+\end{bmatrix}
+\end{equation}
+\begin{equation}
+P_{8}
+\begin{bmatrix}
+x(0) \\ 
+x(1) \\ 
+x(2) \\ 
+x(3) \\ 
+x(4) \\ 
+x(5) \\
+x(6) \\
+x(7)
+\end{bmatrix}
+ = 
+\begin{bmatrix}
+x(0) \\ 
+x(2) \\ 
+x(4) \\ 
+x(6) \\
+x(1) \\ 
+x(3) \\ 
+x(5) \\
+x(7)
+\end{bmatrix}
+\end{equation}
+\begin{equation}
+P_{4}
+\begin{bmatrix}
+x(0) \\ 
+x(2) \\ 
+x(4) \\ 
+x(6) \\
+\end{bmatrix}
+ = 
+\begin{bmatrix}
+x(0) \\ 
+x(4) \\ 
+x(2) \\
+x(6)
+\end{bmatrix}
+\end{equation}
+\begin{equation}
+P_{4}
+\begin{bmatrix}
+x(1) \\ 
+x(3) \\ 
+x(5) \\
+x(7)
+\end{bmatrix}
+ = 
+\begin{bmatrix}
+x(1) \\ 
+x(5) \\ 
+x(3) \\ 
+x(7) \\
+\end{bmatrix}
+\end{equation}
+Therefore,
+\begin{equation}
+\begin{bmatrix}
+X_{3}(0) \\ 
+X_{3}(1)\\ 
+\end{bmatrix}
+= F_{2}
+\begin{bmatrix}
+x(0) \\ 
+x(4) \\ 
+\end{bmatrix}
+\end{equation}
+\begin{equation}
+\begin{bmatrix}
+X_{4}(0) \\ 
+X_{4}(1)\\ 
+\end{bmatrix}
+= F_{2}
+\begin{bmatrix}
+x(2) \\ 
+x(6) \\ 
+\end{bmatrix}
+\end{equation}
+\begin{equation}
+\begin{bmatrix}
+X_{5}(0) \\ 
+X_{5}(1)\\ 
+\end{bmatrix}
+= F_{2}
+\begin{bmatrix}
+x(1) \\ 
+x(5) \\ 
+\end{bmatrix}
+\end{equation}
+\begin{equation}
+\begin{bmatrix}
+X_{6}(0) \\ 
+X_{6}(1)\\ 
+\end{bmatrix}
+= F_{2}
+\begin{bmatrix}
+x(3) \\ 
+x(7) \\ 
+\end{bmatrix}
+\end{equation}
+\item For 
+    \begin{align}
+	    \vec{x} = \myvec{1\\2\\3\\4\\2\\1}
+        \label{eq:equation1}
+    \end{align}
+    compte the DFT  
+		using 
+	    \eqref{eq:dft-mat-def}
+    \item Repeat the above exercise using the FFT
+	    after zero padding $\vec{x}$.
+%	    \eqref{eq:fft-mat-def}
+\item Write a C program to compute the 8-point FFT. 
+ \end{enumerate}
 %
-\section{Exercises}
+ \section{Exercises}
 
-%Answer the following questions by looking at the python code in Problem \ref{prob:output}.
+Answer the following questions by looking at the python code in Problem \ref{prob:output}.
 \begin{enumerate}[label=\thesection.\arabic*]
 \item
 The command
 \begin{lstlisting}
 	output_signal = signal.lfilter(b, a, input_signal)
 	\end{lstlisting}
-%in Problem \ref{prob:output} is executed through the following difference equation
+in Problem \ref{prob:output} is executed through the following difference equation
 \begin{equation}
 \label{eq:iir_filter_gen}
  \sum _{m=0}^{M}a\brak{m}y\brak{n-m}=\sum _{k=0}^{N}b\brak{k}x\brak{n-k}
@@ -737,17 +1191,67 @@ The command
 where the input signal is $x(n)$ and the output signal is $y(n)$ with initial values all 0. Replace
 \textbf{signal.filtfilt} with your own routine and verify.\\
 \solution
+On taking the $Z$-transform on both sides of the difference equation
+	\begin{align}
+		\sum _{m=0}^{M}a\brak{m} z^{-m} Y(z) &= \sum _{k=0}^{N}b\brak{k} z^{-k} X(z) \\
+		\implies H(z) = \frac{Y(z)}{X(z)} &= \frac{\sum _{k=0}^{N}b\brak{k} z^{-k}}{\sum _{m=0}^{M}a\brak{m} z^{-m	}}
+	\end{align}
+	For obtaining the discrete Fourier transform, put $z = \j \frac{2\pi i}{I}$ where $I$ is the length of the input signal and $i = 0, 1, \ldots, I-1$
 Run the following code 
 \begin{lstlisting}
 wget https://github.com/avraghav07/SignalProcessing/blob/master/7/7.1.py
 \end{lstlisting}
 Use the following command in the terminal to run the code
 \begin{lstlisting}
-python3 7.1.py
+python3 7_1.py
 \end{lstlisting}
 %
-\item Repeat all the exercises in the previous sections for the above $a$ and $b$.
-
+\item Repeat all the exercises in the previous sections for the above $a$ and $b$.\\
+\solution
+The polynomial coefficients obtained are
+	\begin{align}
+		\vec{a} = \myvec{1.000 \\ -2.519 \\ 2.561 \\ -1.206 \\ 0.220} \qquad
+		\vec{b} = \myvec{0.003 \\ 0.014 \\ 0.021 \\ 0.014 \\ 0.003}
+	\end{align}
+	
+	The difference equation is then given by
+	\begin{multline}
+		\vec{a}^\top \vec{y} = \vec{b}^\top \vec{x} \\
+		y(n)-(2.519)y(n-1)+(2.561)y(n-2)\\-(1.206)y(n-3)+(0.220)y(n-4)=
+		(0.003)x(n)\\+(0.014)x(n-1)+(0.021)x(n-2)+(0.014)x(n-3)\\+(0.003)x(n-4)
+	\end{multline}
+	
+	where
+	\begin{align}
+		\vec{y} = \myvec{y(n) \\ y(n-1) \\ y(n-2) \\ y(n-3) \\ y(n-4)} \qquad
+		\vec{x} = \myvec{x(n) \\ x(n-1) \\ x(n-2) \\ x(n-3) \\ x(n-4)}
+	\end{align}
+Run the following code 
+\begin{lstlisting}
+wget https://github.com/avraghav07/SignalProcessing/blob/master/7/7.2.1.py
+\end{lstlisting}
+Use the following command in the terminal to run the code and generate the figure below
+\begin{lstlisting}
+python3 7_2_1.py
+\end{lstlisting}
+\begin{figure}[!ht]
+\centering
+\includegraphics[width=\columnwidth]{~/SignalProcessing/7/7.2.1.png}
+\caption{$|H(e^{j\omega})|$}
+\end{figure}
+Run the following code 
+\begin{lstlisting}
+wget https://github.com/avraghav07/SignalProcessing/blob/master/7/7.2.2.py
+\end{lstlisting}
+Use the following command in the terminal to run the code and generate the figure below
+\begin{lstlisting}
+python3 7_2_2.py
+\end{lstlisting}
+\begin{figure}[!ht]
+\centering
+\includegraphics[width=\columnwidth]{~/SignalProcessing/7/7.2.2.png}
+\caption{h(n)}
+\end{figure}
 \item What is the sampling frequency of the input signal?
 \\
 \solution
@@ -759,9 +1263,11 @@ What is type, order and  cutoff-frequency of the above butterworth filter
 The given butterworth filter is low pass with order=4 and cutoff-frequency=4kHz.
 %
 \item
-Modifying the code with different input parameters and to get the best possible output.
+Modifying the code with different input parameters and to get the best possible output.\\
 %
+\solution 
+Order: 10\\
+Cutoff frequency: 3000 Hz
 \end{enumerate}
 
 \end{document}
-\\
